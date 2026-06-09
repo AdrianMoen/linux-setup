@@ -1,0 +1,3 @@
+# linux-setup
+
+Using this as a starting point portable linux configuration. Starting small...
