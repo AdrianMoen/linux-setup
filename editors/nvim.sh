@@ -204,6 +204,15 @@ install_tree_sitter_cli() {
         return 1
     fi
 
+    # 2c. Building tree-sitter-cli pulls in rquickjs-sys, whose bindgen step
+    # needs libclang at compile time. Install it so the cargo build doesn't fail.
+    if ! ldconfig -p 2>/dev/null | grep -q 'libclang'; then
+        log_info "Installing libclang-dev (build dependency for tree-sitter-cli)..."
+        if ! apt_install_packages libclang-dev; then
+            log_warn "Failed to install libclang-dev; the cargo build will likely fail."
+        fi
+    fi
+
     # 3. Install the CLI from crates.io and make sure ~/.cargo/bin is on PATH.
     log_info "Installing tree-sitter-cli via cargo (this can take a few minutes)..."
     if is_dry_run; then
