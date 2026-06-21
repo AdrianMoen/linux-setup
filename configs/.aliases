@@ -1,0 +1,15 @@
+#!/bin/bash
+# Common aliases
+alias l1='ls -1'
+alias ll='ls -alF'
+alias la='ls -A'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias v='vim'
+
+# Desktop convenience (if available)
+if command -v gnome-control-center >/dev/null 2>&1; then
+    alias settings='gnome-control-center'
+fi

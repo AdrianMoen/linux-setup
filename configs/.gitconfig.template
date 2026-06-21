@@ -1,0 +1,15 @@
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[push]
+    autoSetupRemote = true
+
+[core]
+    editor = vim
+
+# If i decide to do this. this will most likely be filled out already on account of this already being cloned:
+# git config --global user.name "Your Name"
+# git config --global user.email "you@example.com"
