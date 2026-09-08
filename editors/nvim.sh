@@ -177,55 +177,96 @@ install_tree_sitter_cli() {
         return 0
     fi
 
-    # 1. Try apt (only packaged on Ubuntu 23.04+/Debian 12+).
-    log_info "Attempting to install tree-sitter-cli via apt..."
-    if apt_install_packages tree-sitter-cli && command -v tree-sitter >/dev/null 2>&1; then
-        log_info "Installed tree-sitter-cli via apt"
-        return 0
-    fi
-    log_warn "tree-sitter-cli unavailable via apt; falling back to cargo."
+    # Easiest way to get tree sitter. Curl the god damn github repo!
+    if ! command -v tree-sitter >/dev/null 2>&1; then
+        mkdir -p "$HOME/.local/bin"
 
-    # 2. Ensure cargo (rust toolchain) is available.
-    if ! command -v cargo >/dev/null 2>&1; then
-        log_info "Installing cargo (rust toolchain) via apt..."
-        if ! apt_install_packages cargo; then
-            log_warn "Failed to install cargo; skipping tree-sitter-cli."
-            log_warn "kickstart works without it (parsers compile via gcc)."
-            add_closing_message "WARN: failed to install cargo for tree-sitter, fix valid tree-sitter-cli or cargo and rerun with --nvim"
-            return 1
+        curl -L \
+            https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.3/tree-sitter-linux-x64.gz \
+            -o /tmp/tree-sitter.gz
+
+        gzip -df /tmp/tree-sitter.gz
+        mv /tmp/tree-sitter "$HOME/.local/bin/tree-sitter"
+        chmod +x "$HOME/.local/bin/tree-sitter"
+
+        shell_name="$(basename "${SHELL:-}")"
+
+        case "$shell_name" in
+          zsh)  rc_file="$HOME/.zshrc" ;;
+          bash) rc_file="$HOME/.bashrc" ;;
+          *)
+            echo "Unsupported shell: $shell_name"
+            exit 1
+            ;;
+        esac
+
+        echo "Detected shell: $shell_name"
+        echo "Using rc file: $rc_file"
+
+        path_line='export PATH="$HOME/.local/bin:$PATH"'
+
+        touch "$rc_file"
+
+        if ! grep -Fqx "$path_line" "$rc_file"; then
+            printf '\n%s\n' "$path_line" >> "$rc_file"
+            echo "Added ~/.local/bin to PATH"
+        else
+            echo "~/.local/bin already present"
         fi
+
+        export PATH="$HOME/.local/bin:$PATH"
+
     fi
 
-    # 2b. The current crate needs a recent rustc; upgrade via rustup if needed.
-    if ! ensure_modern_rust; then
-        log_warn "Could not provide rustc >= $RUST_MIN_VERSION; skipping tree-sitter-cli."
-        log_warn "kickstart works without it (parsers compile via gcc)."
-        add_closing_message "WARN: failed to ensure a recent rustc, fix a valid rustc and rerun with --nvim"
-        return 1
-    fi
-
-    # 2c. Building tree-sitter-cli pulls in rquickjs-sys, whose bindgen step
-    # needs libclang at compile time. Install it so the cargo build doesn't fail.
-    if ! ldconfig -p 2>/dev/null | grep -q 'libclang'; then
-        log_info "Installing libclang-dev (build dependency for tree-sitter-cli)..."
-        if ! apt_install_packages libclang-dev; then
-            log_warn "Failed to install libclang-dev; the cargo build will likely fail."
-        fi
-    fi
-
-    # 3. Install the CLI from crates.io and make sure ~/.cargo/bin is on PATH.
-    log_info "Installing tree-sitter-cli via cargo (this can take a few minutes)..."
-    if is_dry_run; then
-        printf '[DRY-RUN] cargo install tree-sitter-cli\n'
-    elif ! cargo install tree-sitter-cli; then
-        log_warn "cargo install tree-sitter-cli failed; skipping."
-        log_warn "kickstart works without it (parsers compile via gcc)."
-        add_closing_message "WARN: cargo failed to install tree-sitter-cli, fix a valid tree-sitter-cli and rerun with --nvim"
-        return 1
-    fi
-
-    ensure_cargo_bin_in_path
-    log_info "Installed tree-sitter-cli via cargo"
+##    # 1. Try apt (only packaged on Ubuntu 23.04+/Debian 12+).
+##    log_info "Attempting to install tree-sitter-cli via apt..."
+##    if apt_install_packages tree-sitter-cli && command -v tree-sitter >/dev/null 2>&1; then
+##        log_info "Installed tree-sitter-cli via apt"
+##        return 0
+##    fi
+##    log_warn "tree-sitter-cli unavailable via apt; falling back to cargo."
+##
+##    # 2. Ensure cargo (rust toolchain) is available.
+##    if ! command -v cargo >/dev/null 2>&1; then
+##        log_info "Installing cargo (rust toolchain) via apt..."
+##        if ! apt_install_packages cargo; then
+##            log_warn "Failed to install cargo; skipping tree-sitter-cli."
+##            log_warn "kickstart works without it (parsers compile via gcc)."
+##            add_closing_message "WARN: failed to install cargo for tree-sitter, fix valid tree-sitter-cli or cargo and rerun with --nvim"
+##            return 1
+##        fi
+##    fi
+##
+##    # 2b. The current crate needs a recent rustc; upgrade via rustup if needed.
+##    if ! ensure_modern_rust; then
+##        log_warn "Could not provide rustc >= $RUST_MIN_VERSION; skipping tree-sitter-cli."
+##        log_warn "kickstart works without it (parsers compile via gcc)."
+##        add_closing_message "WARN: failed to ensure a recent rustc, fix a valid rustc and rerun with --nvim"
+##        return 1
+##    fi
+##
+##    # 2c. Building tree-sitter-cli pulls in rquickjs-sys, whose bindgen step
+##    # needs libclang at compile time. Install it so the cargo build doesn't fail.
+##    if ! ldconfig -p 2>/dev/null | grep -q 'libclang'; then
+##        log_info "Installing libclang-dev (build dependency for tree-sitter-cli)..."
+##        if ! apt_install_packages libclang-dev; then
+##            log_warn "Failed to install libclang-dev; the cargo build will likely fail."
+##        fi
+##    fi
+##
+##    # 3. Install the CLI from crates.io and make sure ~/.cargo/bin is on PATH.
+##    log_info "Installing tree-sitter-cli via cargo (this can take a few minutes)..."
+##    if is_dry_run; then
+##        printf '[DRY-RUN] cargo install tree-sitter-cli\n'
+##    elif ! cargo install tree-sitter-cli; then
+##        log_warn "cargo install tree-sitter-cli failed; skipping."
+##        log_warn "kickstart works without it (parsers compile via gcc)."
+##        add_closing_message "WARN: cargo failed to install tree-sitter-cli, fix a valid tree-sitter-cli and rerun with --nvim"
+##        return 1
+##    fi
+##
+##    ensure_cargo_bin_in_path
+##    log_info "Installed tree-sitter-cli via cargo"
 }
 
 install_kickstart_external_dependencies () {
