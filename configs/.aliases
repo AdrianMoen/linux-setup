@@ -8,8 +8,14 @@ alias ga='git add'
 alias gc='git commit'
 alias gp='git push'
 alias v='vim'
+alias nv='nvim'
 
 # Desktop convenience (if available)
 if command -v gnome-control-center >/dev/null 2>&1; then
     alias settings='gnome-control-center'
 fi
+
+
+# netcoredbg
+alias netcoredbg='netcoredbg'
+alias clip='iconv -t UTF16LE | clip.exe'

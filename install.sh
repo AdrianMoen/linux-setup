@@ -27,8 +27,8 @@ Flags:
   --zsh        Install/configure zsh
   --ohmyzsh    Install/configure oh-my-zsh
   --aliases    Apply aliases setup
-    --vim        Install/configure neovim (compat alias)
-    --nvim       Install/configure neovim
+  --vim        Install/configure neovim (compat alias)
+  --nvim       Install/configure neovim
   --tmux       Install/configure tmux
   --git        Apply git config setup
   --dry-run    Show what would run without executing
