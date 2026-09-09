@@ -1,0 +1,11 @@
+# Native Linux alacritty config. Symlinked to ~/.config/alacritty/alacritty.toml.
+#
+# [terminal.shell] is deliberately absent: with no override alacritty spawns the
+# login shell from /etc/passwd, which the --zsh module already points at zsh.
+# Hardcoding a shell here would fight with chsh.
+
+# Relative imports resolve against this file's own directory, so base.toml is
+# picked up from ~/.config/alacritty/ alongside it.
+
+[general]
+import = ["base.toml"]

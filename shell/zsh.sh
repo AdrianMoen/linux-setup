@@ -42,15 +42,10 @@ ensure_zsh_in_etc_shells() {
     fi
 }
 
-# Authoritative login shell comes from /etc/passwd, not $SHELL (which is just
-# an inherited env var from the current session).
-current_login_shell() {
-    getent passwd "$(id -un)" 2>/dev/null | awk -F: '{print $NF}'
-}
-
 ensure_zsh_in_etc_shells
 
-LOGIN_SHELL="$(current_login_shell)"
+# login_shell() reads /etc/passwd rather than $SHELL; see core/common.sh.
+LOGIN_SHELL="$(login_shell)"
 
 if [ "$LOGIN_SHELL" = "$ZSH_PATH" ]; then
     log_info "Default login shell already set to zsh ($ZSH_PATH)"
@@ -59,7 +54,7 @@ elif command -v chsh >/dev/null 2>&1; then
     if is_dry_run; then
         printf '[DRY-RUN] chsh -s %s\n' "$ZSH_PATH"
     elif chsh -s "$ZSH_PATH"; then
-        if [ "$(current_login_shell)" = "$ZSH_PATH" ]; then
+        if [ "$(login_shell)" = "$ZSH_PATH" ]; then
             log_info "Default login shell changed to zsh; log out and back in to use it."
             add_closing_message "zsh is now your default login shell. Log out and back in (new SSH session) to start using it."
         else

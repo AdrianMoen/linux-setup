@@ -14,6 +14,8 @@ RUN_OHMYZSH=0
 RUN_ALIASES=0
 RUN_VIM=0
 RUN_TMUX=0
+RUN_ALACRITTY=0
+RUN_FONT=0
 RUN_GIT=0
 
 print_usage() {
@@ -30,13 +32,15 @@ Flags:
   --vim        Install/configure neovim (compat alias)
   --nvim       Install/configure neovim
   --tmux       Install/configure tmux
+  --alacritty  Install/configure alacritty
+  --font       Install the JetBrainsMonoNL Nerd Font
   --git        Apply git config setup
   --dry-run    Show what would run without executing
   --help       Show this help message
 
 Examples:
   ./install.sh --all
-    ./install.sh --apt --zsh --ohmyzsh --aliases --nvim --tmux --git
+  ./install.sh --apt --zsh --ohmyzsh --aliases --nvim --tmux --git
   ./install.sh --git --dry-run
 EOF
 }
@@ -64,11 +68,10 @@ run_script_if_exists() {
 
     log "Running $label module: $script_path"
 
-    if [ "$DRY_RUN" -eq 1 ]; then
-        log "[dry-run] bash $script_path"
-        return 0
-    fi
-
+    # Modules are run even in dry-run mode: each one guards its own side
+    # effects with is_dry_run/run_cmd, so letting them execute is what actually
+    # reports the planned changes. Short-circuiting here would just print the
+    # module name and skip every [DRY-RUN] line it would have produced.
     LINUX_SETUP_DRY_RUN="$DRY_RUN" LINUX_SETUP_CLOSING_FILE="$CLOSING_FILE" bash "$script_path"
 }
 
@@ -119,6 +122,8 @@ parse_args() {
                 RUN_ALIASES=1
                 RUN_VIM=1
                 RUN_TMUX=1
+                RUN_ALACRITTY=1
+                RUN_FONT=1
                 RUN_GIT=1
                 RUN_ANY=1
                 ;;
@@ -144,6 +149,14 @@ parse_args() {
                 ;;
             --tmux)
                 RUN_TMUX=1
+                RUN_ANY=1
+                ;;
+            --alacritty)
+                RUN_ALACRITTY=1
+                RUN_ANY=1
+                ;;
+            --font|--nerdfont)
+                RUN_FONT=1
                 RUN_ANY=1
                 ;;
             --git)
@@ -205,6 +218,14 @@ main() {
 
     if [ "$RUN_TMUX" -eq 1 ]; then
         run_script_if_exists "tmux" "$SCRIPT_DIR/terminal/tmux.sh"
+    fi
+
+    if [ "$RUN_ALACRITTY" -eq 1 ]; then
+        run_script_if_exists "alacritty" "$SCRIPT_DIR/terminal/alacritty.sh"
+    fi
+
+    if [ "$RUN_FONT" -eq 1 ]; then
+        run_script_if_exists "font" "$SCRIPT_DIR/fonts/nerdfont.sh"
     fi
 
     if [ "$RUN_GIT" -eq 1 ]; then

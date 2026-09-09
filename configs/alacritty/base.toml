@@ -1,0 +1,60 @@
+# Shared alacritty settings for every platform.
+# Do not set [terminal.shell] here: that is the one thing that genuinely
+# differs between native Linux and WSL, so it lives in linux.toml/windows.toml.
+
+[font]
+size = 14
+
+[font.normal]
+family = "JetBrainsMonoNL NF"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMonoNL NF"
+style = "Bold"
+
+[font.italic]
+family = "JetBrainsMonoNL NF"
+style = "Italic"
+
+[font.bold_italic]
+family = "JetBrainsMonoNL NF"
+style = "Bold Italic"
+
+# Fix for <C-space> input, mainly for nvim autocomplete.
+[keyboard]
+bindings = [
+  { key = "Space", mods = "Control", chars = "\u0000" }
+]
+
+# Colors (Hyper)
+# Default colors
+[colors.primary]
+background = '#000000'
+foreground = '#ffffff'
+
+[colors.cursor]
+text = '#F81CE5'
+cursor = '#ffffff'
+
+# Normal colors
+[colors.normal]
+black   = '#000000'
+red     = '#fe0100'
+green   = '#33ff00'
+yellow  = '#feff00'
+blue    = '#0066ff'
+magenta = '#cc00ff'
+cyan    = '#00ffff'
+white   = '#d0d0d0'
+
+# Bright colors
+[colors.bright]
+black   = '#808080'
+red     = '#fe0100'
+green   = '#33ff00'
+yellow  = '#feff00'
+blue    = '#0066ff'
+magenta = '#cc00ff'
+cyan    = '#00ffff'
+white   = '#FFFFFF'

@@ -1,0 +1,15 @@
+# Alacritty config for the Windows host of a WSL setup.
+# Copied (not symlinked, since Windows will not follow a WSL symlink) to
+# %APPDATA%\alacritty\alacritty.toml alongside base.toml.
+#
+# Alacritty resolves a relative import against the directory of the config file
+# doing the importing (see normalize_import in alacritty/src/config/mod.rs), so
+# this picks up the base.toml copied next to it. Same line works on Linux.
+
+[general]
+import = ["base.toml"]
+
+[terminal]
+[terminal.shell]
+program = "wsl.exe"
+args = ["-d", "Ubuntu", "--cd", "~"]
