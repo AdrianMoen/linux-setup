@@ -190,6 +190,16 @@ install_kickstart_external_dependencies() {
 }
 
 
+ensure_nvim_editor_in_source() {
+    # Ensures that EDITOR, VISUAL, and SUOD_EDIT is set to nvim.
+    local rc
+    for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+        ensure_line_in_file 'export EDITOR=nvim' "$rc"
+        ensure_line_in_file 'export VISUAL=nvim' "$rc"
+        ensure_line_in_file 'export SUDO_EDITOR=nvim' "$rc"
+    done
+}
+
 #############################################################
 #                                                           #
 #                    ENTRYPOINT                             #
@@ -217,6 +227,10 @@ if ! command -v git >/dev/null 2>&1; then
 fi
 
 run_cmd mkdir -p "$HOME/.config"
+
+if command -v nvim >/dev/null 2>&1; then
+    ensure_nvim_editor_in_source
+fi
 
 # Precedence: an explicit NVIM_CONFIG_REPO, then a local editors/nvim-config
 # checkout, then the default private kickstart remote. The local checkout has to

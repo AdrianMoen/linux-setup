@@ -81,7 +81,8 @@ setup_wsl() {
 setup_native() {
     if ! command -v alacritty >/dev/null 2>&1; then
         log_info "alacritty not found, attempting installation"
-        apt_install_packages alacritty
+        apt_install_packages snap
+        run_cmd sudo snap install alacritty --classic
     else
         log_info "alacritty already installed at $(command -v alacritty)"
     fi
