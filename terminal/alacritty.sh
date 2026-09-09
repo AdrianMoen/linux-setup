@@ -37,15 +37,28 @@ setup_wsl() {
     fi
 
     local target_dir="$WIN_APPDATA/alacritty"
+    local backup_dir="$WIN_APPDATA/alacritty.bak.$(date +%Y%m%d_%H%M%S)"
     local win_display
     win_display="$(to_windows_path "$target_dir")"
 
     if is_dry_run; then
-        printf '[DRY-RUN] mkdir -p %s\n' "$target_dir"
+        if [ -d "$target_dir" ]; then
+            printf '[DRY-RUN] cp -r %s %s\n' "$target_dir" "$backup_dir"
+        else
+            printf '[DRY-RUN] mkdir -p %s\n' "$target_dir"
+        fi
         printf '[DRY-RUN] cp %s/base.toml %s/base.toml\n' "$CONFIG_SOURCE_DIR" "$target_dir"
         printf '[DRY-RUN] cp %s/windows.toml %s/alacritty.toml\n' "$CONFIG_SOURCE_DIR" "$target_dir"
     else
-        mkdir -p "$target_dir"
+
+        # Backup target dir
+        if [ -d "$target_dir" ]; then
+            log_info "Backing up existing alacritty directory to $backup_dir"
+            cp -r "$target_dir" "$backup_dir"
+        else
+            mkdir -p "$target_dir"
+        fi
+
 
         # Copies, not symlinks: Windows will not follow a symlink created from
         # WSL, so config edits need a rerun of this module to take effect.
@@ -62,7 +75,7 @@ setup_wsl() {
         log_info "Installed alacritty config to $win_display"
     fi
 
-    add_closing_message "alacritty config copied to $win_display (these are copies, not symlinks: rerun ./install.sh --alacritty after editing configs/alacritty/). Restart alacritty to pick it up."
+    add_closing_message "alacritty config copied to $win_display (no symlink, rerun ./install.sh --alacritty after editing configs/alacritty/ in this repo). Restart alacritty to pick it up."
 }
 
 setup_native() {
@@ -82,6 +95,12 @@ setup_native() {
     add_closing_message "alacritty configured. Set your terminal font to 'JetBrainsMonoNL NF' if it is not picked up automatically (run ./install.sh --font to install it)."
 }
 
+
+#############################################################
+#                                                           #
+#                    ENTRYPOINT                             #
+#                                                           #
+#############################################################
 if [ ! -d "$CONFIG_SOURCE_DIR" ]; then
     log_error "Missing $CONFIG_SOURCE_DIR; cannot configure alacritty."
     exit 0

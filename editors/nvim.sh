@@ -189,6 +189,12 @@ install_kickstart_external_dependencies() {
     setup_node_for_mason || true
 }
 
+
+#############################################################
+#                                                           #
+#                    ENTRYPOINT                             #
+#                                                           #
+#############################################################
 run_cmd mkdir -p "$LOCAL_BIN"
 
 install_kickstart_external_dependencies
